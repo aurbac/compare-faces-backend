@@ -1,0 +1,68 @@
+# Welcome to Serverless!
+#
+# @author Uriel Ramirez <aurbac@gmail.com>
+#
+# Happy Coding!
+
+service: compare-faces-backend # NOTE: update this with your service name
+
+custom:
+  bucketName: images-compare-faces.kabits.com
+
+provider:
+  name: aws
+  stage: prod
+  runtime: python3.6
+  iamRoleStatements:
+    -  Effect: "Allow"
+       Action:
+         - "rekognition:*"
+       Resource:
+         - "*"
+    -  Effect: "Allow"
+       Action:
+         - "s3:*"
+       Resource:
+         - "arn:aws:s3:::${self:custom.bucketName}/*"
+
+functions:
+  getImageResult:
+    timeout: 15
+    memorySize: 1024
+    runtime: python3.6
+    handler: handler.getImageResult
+    environment:
+      S3_BUCKET: ${self:custom.bucketName}
+    events:
+      - http: GET get-image-result/{id}
+
+  getInformation:
+    timeout: 15
+    memorySize: 1024
+    runtime: python3.6
+    handler: handler.getInformation
+    environment:
+      S3_BUCKET: ${self:custom.bucketName}
+    events:
+      - http:
+          path: get-information
+          method: post
+
+resources:
+  Resources:
+    S3BucketPhotos:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+        # Set the CORS policy
+        CorsConfiguration:
+          CorsRules:
+            -
+              AllowedOrigins:
+                - 'https://compare-faces.kabits.com'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+              MaxAge: 3000
