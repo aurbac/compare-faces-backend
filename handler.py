@@ -1,3 +1,8 @@
+# Uriel Ramirez
+# aurbac@gmail.com
+# kabits.com
+# version: 1.0
+
 import json
 import urllib
 import boto3
